@@ -1,6 +1,8 @@
 class Shader{
 
     constructor(gl, vsSource, fsSource){
+        this.gl = gl;
+
         const vert = loadShader(gl, gl.VERTEX_SHADER, vsSource);
         const frag = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
         
@@ -19,27 +21,32 @@ class Shader{
         gl.deleteShader(frag);
     }
 
-    use(gl){
-        gl.useProgram(this.id);
+    use(){
+        this.gl.useProgram(this.id);
     }
 
-    setBool(gl, name, value){
+    setBool(name, value){
+        let gl = this.gl;
         gl.uniform1i(gl.getUniformLocation(this.id, name), Math.floor(value));
     }
 
-    setInt(gl, name, value){
+    setInt(name, value){
+        let gl = this.gl;
         gl.uniform1i(gl.getUniformLocation(this.id, name), value);
     }
 
-    setVec2(gl, name, x, y) {
+    setVec2(name, x, y) {
+        let gl = this.gl;
         gl.uniform2f(gl.getUniformLocation(this.id, name), x, y);
     }
 
-    setVec3(gl, name, x, y, z) {
+    setVec3(name, x, y, z) {
+        let gl = this.gl;
         gl.uniform3f(gl.getUniformLocation(this.id, name), x, y, z);
     }
 
-    setMat4(gl, name, mat){
+    setMat4(name, mat){
+        let gl = this.gl;
         gl.uniformMatrix4fv(gl.getUniformLocation(this.id, name), false, mat);
     }
     

@@ -8,6 +8,12 @@ class Renderer {
         this.timeDelta = -1;
         this.camera = null;
 
+        this.pointerLocked = false;
+
+        this.canvas.addEventListener("click", async () => {
+            await this.canvas.requestPointerLock();
+        });
+
         let lastTimeStamp = -1;
 
         this.frameCallback = (timestamp) => {
@@ -21,7 +27,7 @@ class Renderer {
             this.OnFrame(timestamp, this.timeDelta);
         };
 
-        
+    
         this.resizeCallback = (event) => {
             const scalar = Math.min(devicePixelRatio, 1.5);
 
@@ -37,31 +43,32 @@ class Renderer {
             this.OnResize(this.canvas.width, this.canvas.height);
         }
 
+
+        this.key2pressed = {};
         this.keydownCallback = (event) => {
-            if(event.keyCode == 65){
-                // A
-                this.camera.processMovement(0, this.timeDelta);
-            }
-            if(event.keyCode == 68){
-                // D
-                this.camera.processMovement(1, this.timeDelta);
-            }
-            if(event.keyCode == 87){
-                // W
-                this.camera.processMovement(2, this.timeDelta);
-            }
-            if(event.keyCode == 83){
-                // S
-                this.camera.processMovement(3, this.timeDelta);
-            }
+            this.key2pressed[event.keyCode] = true;
         }
 
+        this.keyupCallback = (event) => {
+            this.key2pressed[event.keyCode] = false;
+        }
+                
+        this.mouseMoveCallback = (event) => {
+            if(document.pointerLockElement === this.canvas){
+                let dx = event.movementX;
+                let dy = event.movementY;
+
+                this.camera.processRotation(dx, dy);
+            }
+        }
     }
 
 
     start(){
         window.addEventListener('resize', this.resizeCallback);
         window.addEventListener('keydown', this.keydownCallback);
+        window.addEventListener('keyup', this.keyupCallback);
+        window.addEventListener('mousemove', this.mouseMoveCallback)
         this.resizeCallback();
         this.refId = requestAnimationFrame(this.frameCallback);
     }
@@ -81,6 +88,22 @@ class Renderer {
     
     OnFrame(){
         // Override with renderer-specific logic.
+            if(this.key2pressed[65]){
+                // A
+                this.camera.processMovement(0, this.timeDelta);
+            }
+            if(this.key2pressed[68]){
+                // D
+                this.camera.processMovement(1, this.timeDelta);
+            }
+            if(this.key2pressed[87]){
+                // W
+                this.camera.processMovement(2, this.timeDelta);
+            }
+            if(this.key2pressed[83]){
+                // S
+                this.camera.processMovement(3, this.timeDelta);
+            }
     }
 
 }

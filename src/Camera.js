@@ -2,6 +2,7 @@ import { mat4 } from "gl-matrix";
 import { vec3 } from "gl-matrix";
 
 class Camera{
+
     constructor (x, y, z, ux, uy, uz, yaw, pitch){
         this.pos = vec3.fromValues(x,y,z);
         this.worldUp = vec3.fromValues(ux,uy,uz);
@@ -9,9 +10,13 @@ class Camera{
         this.pitch = pitch;
 
         this.updateCameraVector();
+
+        this.sensitivity = 0.1;
     }
 
     getViewMatrix(){
+        this.updateCameraVector();
+
         const target = vec3.create();
         vec3.add(target, this.pos, this.front);
 
@@ -52,7 +57,7 @@ class Camera{
     }
 
     processMovement(direction, deltatime){
-        const d = 5 * deltatime/1000.0;
+        const d = 10 * deltatime/1000.0;
         if(direction == 0){
             vec3.scaleAndAdd(this.pos, this.pos, this.right, -d);
         }
@@ -65,6 +70,11 @@ class Camera{
         if(direction == 3){
             vec3.scaleAndAdd(this.pos, this.pos, this.front, -d);
         }
+    }
+
+    processRotation(dx, dy){
+        this.yaw += dx * this.sensitivity;
+        this.pitch -= dy * this.sensitivity;
     }
 }
 
