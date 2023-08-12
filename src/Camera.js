@@ -45,17 +45,15 @@ class Camera{
         vec3.normalize(this.up, this.up);
     }
 
+    // Update yaw and pitch to look given point.
     lookAt(x, y, z){
-        this.front = vec3.fromValues(x-this.pos[0], y-this.pos[1], z-this.pos[2]);
-        vec3.normalize(this.front, this.front);
 
-        this.right = vec3.create();
-        vec3.cross(this.right, this.front, this.worldUp)
-        vec3.normalize(this.right, this.right);
+        let dir = vec3.create();
+        vec3.sub(dir, vec3.fromValues(x, y, z), this.pos);
+        vec3.normalize(dir, dir);
 
-        this.up = vec3.create();
-        vec3.cross(this.up, this.right, this.front)
-        vec3.normalize(this.up, this.up);
+        this.yaw = Math.atan2(dir[2], dir[0]) * 180 / Math.PI;
+        this.pitch = Math.asin(dir[1]) * 180 / Math.PI;
     }
 
     processMovement(direction, deltatime){
