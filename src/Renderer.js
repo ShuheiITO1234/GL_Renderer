@@ -1,5 +1,8 @@
+
+///
 class Renderer {
 
+    //---------------------------------------
     constructor(){
 
         this.canvas = document.createElement("canvas");
@@ -10,12 +13,17 @@ class Renderer {
 
         this.pointerLocked = false;
 
+        // event call-backs -------------
         this.canvas.addEventListener("click", async () => {
             await this.canvas.requestPointerLock();
         });
 
-        let lastTimeStamp = -1;
+        this.canvas.onwheel = function(event){
+            event.preventDefault();
+        };
+        
 
+        let lastTimeStamp = -1;
         this.frameCallback = (timestamp) => {
             this.timeDelta = lastTimeStamp == -1 ? 0 : timestamp - lastTimeStamp;
             lastTimeStamp = timestamp;
@@ -61,19 +69,27 @@ class Renderer {
                 this.camera.processRotation(dx, dy);
             }
         }
+
+        this.mouseWheelCallback = (event) => {
+            this.camera.processZoom(event.wheelDelta);
+        }
+
+        this.mouseMoveCallback
     }
 
-
+    //---------------------------------------
     start(){
         window.addEventListener('resize', this.resizeCallback);
         window.addEventListener('keydown', this.keydownCallback);
         window.addEventListener('keyup', this.keyupCallback);
-        window.addEventListener('mousemove', this.mouseMoveCallback)
+        window.addEventListener('mousemove', this.mouseMoveCallback);
+        window.addEventListener('wheel', this.mouseWheelCallback);
         this.resizeCallback();
         this.refId = requestAnimationFrame(this.frameCallback);
     }
 
 
+    //---------------------------------------
     async init(){
         // Override with renderer-specific resize logic.
     }
@@ -86,24 +102,26 @@ class Renderer {
         // Override with renderer-specific logic.
     }
     
+    //---------------------------------------
     OnFrame(){
-        // Override with renderer-specific logic.
-            if(this.key2pressed[65]){
-                // A
-                this.camera.processMovement(0, this.timeDelta);
-            }
-            if(this.key2pressed[68]){
-                // D
-                this.camera.processMovement(1, this.timeDelta);
-            }
-            if(this.key2pressed[87]){
-                // W
-                this.camera.processMovement(2, this.timeDelta);
-            }
-            if(this.key2pressed[83]){
-                // S
-                this.camera.processMovement(3, this.timeDelta);
-            }
+        // Process Inputs
+
+        if(this.key2pressed[65]){
+            // A
+            this.camera.processMovement(0, this.timeDelta);
+        }
+        if(this.key2pressed[68]){
+            // D
+            this.camera.processMovement(1, this.timeDelta);
+        }
+        if(this.key2pressed[87]){
+            // W
+            this.camera.processMovement(2, this.timeDelta);
+        }
+        if(this.key2pressed[83]){
+            // S
+            this.camera.processMovement(3, this.timeDelta);
+        }
     }
 
 }

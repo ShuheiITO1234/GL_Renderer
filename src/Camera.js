@@ -3,15 +3,17 @@ import { vec3 } from "gl-matrix";
 
 class Camera{
 
-    constructor (x, y, z, ux, uy, uz, yaw, pitch){
+    constructor (x, y, z, ux, uy, uz, yaw, pitch, fov){
         this.pos = vec3.fromValues(x,y,z);
         this.worldUp = vec3.fromValues(ux,uy,uz);
         this.yaw = yaw;
         this.pitch = pitch;
+        this.fov = fov;
 
         this.updateCameraVector();
 
         this.sensitivity = 0.1;
+        this.zoomSensitivity = 0.05;
     }
 
     getViewMatrix(){
@@ -75,6 +77,10 @@ class Camera{
     processRotation(dx, dy){
         this.yaw += dx * this.sensitivity;
         this.pitch -= dy * this.sensitivity;
+    }
+
+    processZoom(amt){
+        this.fov += amt * this.zoomSensitivity;
     }
 }
 

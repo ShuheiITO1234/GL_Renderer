@@ -10,6 +10,7 @@ import fsSource from './shaders/f.frag?raw';
 
 class WebGLRenderer extends Renderer {
 
+    //---------------------------------------
     constructor(){
         super();
         this.gl = this.canvas.getContext("webgl2");
@@ -24,15 +25,17 @@ class WebGLRenderer extends Renderer {
             checker_colored : "src\\images\\checker2kC.png"
         });
         
-        this.camera = new Camera(5, 4, 7, 0, 1, 0, 0, 0);
+        this.camera = new Camera(5, 4, 7, 0, 1, 0, 0, 0, 45);
         this.camera.lookAt(0, 0, 0);
     }
 
+    //---------------------------------------
     OnResize(width, height){
         this.width = width;
         this.height = height;
     }
 
+    //---------------------------------------
     // Main loop function.
     OnFrame(timestamp, timeDelta){
 
@@ -49,12 +52,13 @@ class WebGLRenderer extends Renderer {
         this.drawScene(this.shader);
     }
 
+    // draw geometries with given shader
     drawScene(shader){
         let gl = this.gl;
         let model = mat4.create();
         const view = this.camera.getViewMatrix();
         const proj = mat4.create();
-        mat4.perspective(proj, Math.PI/4.0, this.width/this.height, 0.1, 100.0);
+        mat4.perspective(proj, this.camera.fov * Math.PI / 180.0, this.width/this.height, 0.1, 100.0);
 
         shader.use();
         shader.setMat4("proj", proj);
@@ -73,14 +77,28 @@ class WebGLRenderer extends Renderer {
         mat4.scale(model, model, vec3.fromValues(0.4, 0.4, 0.4));
         shader.setMat4("model", model);
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_colored);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_gray);
         this.renderCube();
+
+        model = mat4.create();
+        mat4.translate(model, model, vec3.fromValues(0, -1.0, 0));
+        mat4.scale(model, model, vec3.fromValues(5, 5, 5));
+        shader.setMat4("model", model);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_colored);
+        this.renderPlane();
     }
 
     renderCube(){
         let gl = this.gl;
         gl.bindVertexArray(this.vao.cube);
         gl.drawArrays(gl.TRIANGLES, 0, 36);
+    }
+
+    renderPlane(){
+        let gl = this.gl;
+        gl.bindVertexArray(this.vao.plane);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 }
 
