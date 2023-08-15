@@ -32,6 +32,7 @@ class Camera{
         this.front = vec3.create();
         const y = this.yaw * Math.PI / 180.0;
         const p = this.pitch * Math.PI / 180.0;
+        
         this.front[0] = Math.cos(y) * Math.cos(p);
         this.front[1] = Math.sin(p);
         this.front[2] = Math.sin(y) * Math.cos(p);
@@ -75,6 +76,10 @@ class Camera{
     processRotation(dx, dy){
         this.yaw += dx * this.sensitivity;
         this.pitch -= dy * this.sensitivity;
+
+        this.yaw = ((this.yaw % 360) + 360.0) % 360.0;
+        const e = 0.1;
+        this.pitch = Math.min(90-e, Math.max(-90+e, this.pitch));
     }
 
     processZoom(amt){

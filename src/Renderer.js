@@ -25,6 +25,7 @@ class Renderer {
 
         let lastTimeStamp = -1;
         this.frameCallback = (timestamp) => {
+            this.timestamp = timestamp;
             this.timeDelta = lastTimeStamp == -1 ? 0 : timestamp - lastTimeStamp;
             lastTimeStamp = timestamp;
             
@@ -102,10 +103,13 @@ class Renderer {
         // Override with renderer-specific logic.
     }
     
-    //---------------------------------------
     OnFrame(){
         // Process Inputs
+        this.processKeyInput();        
+    }
 
+    //---------------------------------------
+    processKeyInput(){
         if(this.key2pressed[65]){
             // A
             this.camera.processMovement(0, this.timeDelta);
@@ -121,6 +125,20 @@ class Renderer {
         if(this.key2pressed[83]){
             // S
             this.camera.processMovement(3, this.timeDelta);
+        }
+
+        // ←↑→↓
+        if(this.key2pressed[37]){
+            this.camera.processRotation(-20,0);
+        }
+        if(this.key2pressed[38]){
+            this.camera.processRotation(0,-20);
+        }
+        if(this.key2pressed[39]){
+            this.camera.processRotation(20,0);
+        }
+        if(this.key2pressed[40]){
+            this.camera.processRotation(0,20);
         }
     }
 
