@@ -74,18 +74,18 @@ class WebGLRenderer extends Renderer {
             view[8], view[9], view[10], 0,
             0, 0, 0, 1
         );
-
         this.skyShader.setMat4("view", viewTrans);
+
+        // render scene
+        gl.viewport(0, 0, this.width, this.height);
+        gl.depthMask(true);
+        this.drawScene(this.shader);
 
         //render background
         gl.viewport(0, 0, this.width, this.height);
         gl.depthMask(false);
         this.skyShader.use();
         this.renderCube();
-
-        // render scene
-        gl.depthMask(true);
-        this.drawScene(this.shader);
     }
 
     // draw geometries with given shader
