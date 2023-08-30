@@ -3,6 +3,8 @@ import {Renderer} from "../Renderer.js";
 import {Camera} from "../Camera.js";
 import {initVAO, initTexture} from "../init-buffers.js";
 
+import { Json2Va } from "../json2vertexArray.js";
+
 import {mat3, mat4, vec3} from "gl-matrix";
 
 import vsSource from './shaders/mat1/v.vert?raw';
@@ -38,6 +40,8 @@ class WebGLRenderer extends Renderer {
         // setup camera
         this.camera = new Camera(5, 4, 7, 0, 1, 0, 0, 0, 45);
         this.camera.lookAt(0, 0, 0);
+        
+        this.parser = new Json2Va(this.gl);
     }
 
     //---------------------------------------
@@ -108,7 +112,7 @@ class WebGLRenderer extends Renderer {
         shader.setMat4("model", model);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_gray);
-        this.renderCube();
+        this.renderCustom();
 
         model = mat4.create();
         mat4.translate(model, model, vec3.fromValues(0, -1.0, 0));
@@ -129,6 +133,18 @@ class WebGLRenderer extends Renderer {
         let gl = this.gl;
         gl.bindVertexArray(this.vao.plane);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    renderQuad(){
+        let gl = this.gl;
+        gl.bindVertexArray(this.vao.quad);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    renderCustom(){
+        let gl = this.gl;
+        gl.bindVertexArray(this.parser.vaList[0]);
+        gl.drawArrays(gl.TRIANGLES, 0, this.parser.sizeList[0]);
     }
 }
 
