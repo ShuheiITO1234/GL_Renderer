@@ -112,52 +112,15 @@ class WebGLRenderer extends Renderer {
             gl.depthFunc(gl.LEQUAL);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            // render scene
-            gl.viewport(0, 0, this.texWidth, this.texWidth);
-            gl.depthMask(false);
-            this.drawScene(this.shader);
 
-            //render background
-            gl.depthMask(false);
-            this.skyShader.use();
-            this.renderCube();
+            
+
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         this.quadShader.use();
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.info.tex);
         this.renderCube();
-    }
-
-    // draw geometries with given shader
-    drawScene(shader){
-        let gl = this.gl;
-        let model = mat4.create();
-        shader.use();
-        
-        model = mat4.create();
-        mat4.translate(model, model, vec3.fromValues(0, 0, 0));
-        mat4.rotate(model, model, 0, vec3.fromValues(0, 1, 0));
-        shader.setMat4("model", model);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_gray);
-        this.renderCube();
-
-        model = mat4.create();
-        mat4.translate(model, model, vec3.fromValues(1.8, -0.6, 0.6));
-        mat4.scale(model, model, vec3.fromValues(0.4, 0.4, 0.4));
-        shader.setMat4("model", model);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_gray);
-        this.renderCustom();
-
-        model = mat4.create();
-        mat4.translate(model, model, vec3.fromValues(0, -1.0, 0));
-        mat4.scale(model, model, vec3.fromValues(5, 5, 5));
-        shader.setMat4("model", model);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture.checker_colored);
-        this.renderPlane();
     }
 
     renderCube(){
