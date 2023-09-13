@@ -13,6 +13,17 @@ import fsSource from './shaders/mat1/f.frag?raw';
 import skyVsSource from './shaders/skybox_grad/skybox_grad.vert?raw';
 import skyFsSource from './shaders/skybox_grad/skybox_grad.frag?raw';
 
+import quadVsSource from './shaders/NDCQuad/NDCQuad.vert?raw';
+import quadFsSource from './shaders/NDCQuad/NDCQuad.frag?raw';
+
+import {
+    createVertexArray,
+    createBuffer,
+    createTexture,
+    createFramebuffer
+} from '../createGLData.js';
+
+
 class WebGLRenderer extends Renderer {
 
     //---------------------------------------
@@ -29,6 +40,7 @@ class WebGLRenderer extends Renderer {
         // setup shaders
         this.shader = new Shader(this.gl, vsSource, fsSource);
         this.skyShader = new Shader(this.gl, skyVsSource, skyFsSource);
+        this.quadShader = new Shader(this.gl, quadVsSource, quadFsSource);
 
         // setup datas
         this.vao = initVAO(this.gl);
@@ -42,12 +54,25 @@ class WebGLRenderer extends Renderer {
         this.camera.lookAt(0, 0, 0);
         
         this.parser = new Json2Va(this.gl);
+
+
+        const ext = this.gl.getExtension('EXT_color_buffer_float');
+
     }
 
     //---------------------------------------
     OnResize(width, height){
         this.width = width;
         this.height = height;
+    }
+
+    init(){
+        let gl = this.gl;
+        this.texWidth = 1024;
+        const tex = createTexture(gl, null, 4, gl.RGBA32F, gl.RGBA, gl.FLOAT, this.texWidth, this.texWidth);
+        const fb = createFramebuffer(gl, tex);
+        this.info = {fb:fb, tex:tex};
+
     }
 
     //---------------------------------------
@@ -80,15 +105,27 @@ class WebGLRenderer extends Renderer {
         );
         this.skyShader.setMat4("view", viewTrans);
 
-        // render scene
-        gl.viewport(0, 0, this.width, this.height);
-        gl.depthMask(true);
-        this.drawScene(this.shader);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.info.fb);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearDepth(1.0);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        //render background
-        gl.viewport(0, 0, this.width, this.height);
-        gl.depthMask(false);
-        this.skyShader.use();
+            // render scene
+            gl.viewport(0, 0, this.texWidth, this.texWidth);
+            gl.depthMask(false);
+            this.drawScene(this.shader);
+
+            //render background
+            gl.depthMask(false);
+            this.skyShader.use();
+            this.renderCube();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        this.quadShader.use();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.info.tex);
         this.renderCube();
     }
 
