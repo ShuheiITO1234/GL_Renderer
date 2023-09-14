@@ -16,12 +16,16 @@ import skyFsSource from './shaders/skybox_grad/skybox_grad.frag?raw';
 import quadVsSource from './shaders/NDCQuad/NDCQuad.vert?raw';
 import quadFsSource from './shaders/NDCQuad/NDCQuad.frag?raw';
 
+import testVsSource from './shaders/test/test.vert?raw';
+import testFsSource from './shaders/test/test.frag?raw';
+
 import {
     createVertexArray,
     createBuffer,
     createTexture,
     createFramebuffer
 } from '../createGLData.js';
+import { transformWithEsbuild } from "vite";
 
 
 class WebGLRenderer extends Renderer {
@@ -41,6 +45,7 @@ class WebGLRenderer extends Renderer {
         this.shader = new Shader(this.gl, vsSource, fsSource);
         this.skyShader = new Shader(this.gl, skyVsSource, skyFsSource);
         this.quadShader = new Shader(this.gl, quadVsSource, quadFsSource);
+        this.testShader = new Shader(this.gl, testVsSource, testFsSource);
 
         // setup datas
         this.vao = initVAO(this.gl);
@@ -72,6 +77,19 @@ class WebGLRenderer extends Renderer {
         const tex = createTexture(gl, null, 4, gl.RGBA32F, gl.RGBA, gl.FLOAT, this.texWidth, this.texWidth);
         const fb = createFramebuffer(gl, tex);
         this.info = {fb:fb, tex:tex};
+
+        this.nrPoints = 50;
+        function rand(a,b) {return (b-a)*Math.random() + a;}
+        let randomNdcPositions = new Float32Array(new Array(this.nrPoints).fill(0).map(_=>[rand(-1,1),rand(-1,1),0.0]).flat());
+
+        this.pointVa = gl.createVertexArray();
+        gl.bindVertexArray(this.pointVa);
+            const buf = createBuffer(gl, randomNdcPositions, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.enableVertexAttribArray(0);
+            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindVertexArray(null);
 
     }
 
@@ -111,10 +129,8 @@ class WebGLRenderer extends Renderer {
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-
-            
-
+            this.testShader.use();
+            gl.drawArrays(gl.POINTS, 0, this.nrPoints);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         this.quadShader.use();
