@@ -7,9 +7,9 @@ uniform sampler2D sortedTex;
 uniform int texDimensionsX;
 uniform int nrParticles;
 uniform int hashDimension;
+uniform float flag;
 
-out vec2 iIndices;
-
+out float iflag;
 // vec4 sampleTex(int i){
 //     ivec2 texCoords = ivec2(i%texDimensionsX, i/texDimensionsX);
 //     return  texelFetch(sortedTex, texCoords, 0);
@@ -17,7 +17,9 @@ out vec2 iIndices;
 
 void main() {
     
-    gl_Position = vec4(instancePosition))
+    iflag = flag;
+    gl_Position = vec4(instancePosition + flag*0.01, 1.0);
+    gl_PointSize = 2.0;
 
     // vec2 hashAndIndecis = sampleTex(gl_InstanceID).xy;
     // float hash_prev = sampleTex(gl_InstanceID !=0 ? gl_InstanceID-1 : nrParticles-1).y;

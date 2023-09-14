@@ -25,7 +25,6 @@ import {
     createTexture,
     createFramebuffer
 } from '../createGLData.js';
-import { transformWithEsbuild } from "vite";
 
 
 class WebGLRenderer extends Renderer {
@@ -36,7 +35,7 @@ class WebGLRenderer extends Renderer {
         super();
 
         // set up gl
-        this.gl = this.canvas.getContext("webgl2");
+        this.gl = this.canvas.getContext("webgl2", { premultipliedAlpha: true });
           
         this.width = this.canvas.width;
         this.height = this.canvas.height;
@@ -73,7 +72,7 @@ class WebGLRenderer extends Renderer {
 
     init(){
         let gl = this.gl;
-        this.texWidth = 1024;
+        this.texWidth = 100;
         const tex = createTexture(gl, null, 4, gl.RGBA32F, gl.RGBA, gl.FLOAT, this.texWidth, this.texWidth);
         const fb = createFramebuffer(gl, tex);
         this.info = {fb:fb, tex:tex};
@@ -81,6 +80,8 @@ class WebGLRenderer extends Renderer {
         this.nrPoints = 50;
         function rand(a,b) {return (b-a)*Math.random() + a;}
         let randomNdcPositions = new Float32Array(new Array(this.nrPoints).fill(0).map(_=>[rand(-1,1),rand(-1,1),0.0]).flat());
+        // let half = randomNdcPositions.slice(Math.floor(3 * this.nrPoints*0.5), 3 * this.nrPoints);
+        // randomNdcPositions.set(half, 0);
 
         this.pointVa = gl.createVertexArray();
         gl.bindVertexArray(this.pointVa);
@@ -100,7 +101,7 @@ class WebGLRenderer extends Renderer {
         super.OnFrame();
 
         let gl = this.gl;
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearColor(0.2,0,0, 1.0);
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
@@ -124,19 +125,32 @@ class WebGLRenderer extends Renderer {
         this.skyShader.setMat4("view", viewTrans);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.info.fb);
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.clearDepth(1.0);
-            gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl.LEQUAL);
+            gl.viewport(0, 0, this.texWidth, this.texWidth);
+            gl.clearColor(0.0,0.0,0.0,1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             this.testShader.use();
+            this.testShader.setFloat("flag", 0);
+            gl.bindVertexArray(this.pointVa);
             gl.drawArrays(gl.POINTS, 0, this.nrPoints);
+            gl.bindVertexArray(null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.info.fb);
+            this.testShader.use();
+            this.testShader.setFloat("flag", 1);
+            gl.bindVertexArray(this.pointVa);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE);
+            gl.drawArrays(gl.POINTS, 0, this.nrPoints);
+            gl.bindVertexArray(null);
+            gl.disable(gl.BLEND);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         this.quadShader.use();
+        gl.viewport(0, 0, Math.min(this.width, this.height), Math.min(this.width, this.height));
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.info.tex);
-        this.renderCube();
+        this.renderQuad();
     }
 
     renderCube(){
