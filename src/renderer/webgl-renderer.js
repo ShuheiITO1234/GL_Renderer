@@ -35,7 +35,7 @@ class WebGLRenderer extends Renderer {
         super();
 
         // set up gl
-        this.gl = this.canvas.getContext("webgl2", { premultipliedAlpha: true });
+        this.gl = this.canvas.getContext("webgl2", { premultipliedAlpha: true, preserveDrawingBuffer: true });
           
         this.width = this.canvas.width;
         this.height = this.canvas.height;
@@ -138,10 +138,13 @@ class WebGLRenderer extends Renderer {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.info.fb);
             this.testShader.use();
             this.testShader.setFloat("flag", 1);
+            gl.clearColor(0,0,0,1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.bindVertexArray(this.pointVa);
+            gl.blendEquation(gl.FUNC_ADD);
             gl.enable(gl.BLEND);
-            gl.blendFuncSeparate(gl.ONE, gl.ONE, gl.ONE, gl.ONE_MINUS_CONSTANT_ALPHA);
-            gl.drawArrays(gl.POINTS, 0, this.nrPoints);
+            gl.blendFunc(gl.ONE, gl.ONE);
+            gl.drawArraysInstanced(gl.POINTS, 0, 1, this.nrPoints);
             gl.bindVertexArray(null);
             gl.disable(gl.BLEND);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
