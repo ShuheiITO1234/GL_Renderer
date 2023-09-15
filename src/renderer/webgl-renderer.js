@@ -140,7 +140,7 @@ class WebGLRenderer extends Renderer {
             this.testShader.setFloat("flag", 1);
             gl.bindVertexArray(this.pointVa);
             gl.enable(gl.BLEND);
-            gl.blendFunc(gl.ONE, gl.ONE);
+            gl.blendFuncSeparate(gl.ONE, gl.ONE, gl.ONE, gl.ONE_MINUS_CONSTANT_ALPHA);
             gl.drawArrays(gl.POINTS, 0, this.nrPoints);
             gl.bindVertexArray(null);
             gl.disable(gl.BLEND);
